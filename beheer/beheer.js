@@ -74,8 +74,11 @@
       e.preventDefault();
       uit.replaceChildren();
       await bezig(knop, async () => {
-        const { error } = await sb.auth.signInWithOtp({ email: email.value.trim().toLowerCase(), options: { emailRedirectTo: location.origin + location.pathname } });
-        uit.append(error ? melding("fout", "Versturen lukte niet. Probeer het over een paar minuten opnieuw.") : melding("goed", "Kijk in je mail: je hebt een inloglink gekregen. Open die op dit apparaat."));
+        const adres = email.value.trim().toLowerCase();
+        try { await window.ik.functie("inloggen", { method: "POST", body: { email: adres } }); } catch { /* inloglink hieronder geeft de melding */ }
+        const { error } = await sb.auth.signInWithOtp({ email: adres, options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: false } });
+        const geenAccount = error && /signups?|not allowed|not found/i.test(error.message);
+        uit.append(error ? melding("fout", geenAccount ? "Dit e-mailadres heeft geen toegang. Vraag een bestuurslid om je toe te voegen." : "Versturen lukte niet. Probeer het over een paar minuten opnieuw.") : melding("goed", "Kijk in je mail: je hebt een inloglink gekregen. Open die op dit apparaat."));
       })();
     });
     inhoud.replaceChildren(kaart(el("h1", { text: "Beheer" }), el("p", { text: "Voor het bestuur van de Industriekring. Log in met je e-mailadres; je krijgt een link per mail." }), boodschap ? melding("let", boodschap) : null, form));
@@ -504,9 +507,11 @@
     beheerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       await bezig(toevoegen, async () => {
-        const { error } = await sb.from("beheerder_toegestaan").insert({ naam: nieuweNaam.value.trim(), email: nieuwEmail.value.trim().toLowerCase() });
-        if (error) beheerUit.replaceChildren(melding("fout", "Toevoegen lukte niet. Staat dit adres er al?"));
-        else { bewaar("beheerders", "goed", "Toegevoegd. Diegene kan nu inloggen met dit e-mailadres."); instellingenScherm(); }
+        try {
+          await actie({ actie: "beheerder_toevoegen", naam: nieuweNaam.value.trim(), email: nieuwEmail.value.trim().toLowerCase() });
+          bewaar("beheerders", "goed", "Toegevoegd. Diegene kan nu inloggen op deze pagina met dit e-mailadres.");
+          instellingenScherm();
+        } catch (err) { beheerUit.replaceChildren(melding("fout", err.message)); }
       })();
     });
 
