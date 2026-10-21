@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
 <link rel="stylesheet" href="../assets/stijl.css">
 <link rel="icon" href="../assets/favicon.png">
+<style>#inhoud > * + * { margin-top: 16px; }</style>
 </head>
 <body>
 <header class="kop"><div class="binnen">
@@ -33,8 +34,7 @@
 
   function kopKaart(b, persoon) {
     const kaart = el("div", { class: "kaart" });
-    if (b.afbeelding_url) kaart.append(el("img", { src: b.afbeelding_url, alt: "", style: "width:100%;height:auto;display:block;margin:-24px -24px 20px;width:calc(100% + 48px);max-width:none" }));
-    kaart.append(
+    kaart.append(...[
       el("div", { class: "datumrij" },
         el("div", { class: "datumblok", "aria-hidden": "true" }, el("span", { class: "d", text: dag(b.start) }), el("span", { class: "m", text: maand(b.start) })),
         el("span", { class: "label", text: persoon?.naam ? `Uitnodiging voor ${persoon.naam}` : "Uitnodiging" })),
@@ -44,8 +44,11 @@
         el("strong", { text: `${datumLang(b.start)}, ${tijd(b.start)} uur` }),
         b.programma ? el("div", { text: b.programma }) : null,
         (b.locatie || b.adres) ? el("div", { text: [b.locatie, b.adres].filter(Boolean).join(", ") }) : null),
-    );
-    return kaart;
+    ].filter(Boolean));
+    if (!b.afbeelding_url) return kaart;
+    return el("div", { class: "kaart-met-beeld" },
+      el("img", { src: b.afbeelding_url, alt: "", style: "width:100%;height:auto;display:block;border:1px solid var(--lijn);border-bottom:0" }),
+      kaart);
   }
 
   function formulier(d) {
@@ -110,11 +113,11 @@
       } finally { knop.disabled = false; }
     });
 
-    kaart.append(
+    kaart.append(...[
       el("h2", { text: a ? "Je reactie aanpassen" : "Laat weten of je komt" }),
       a ? el("p", { class: "hint", text: `Je huidige reactie: ${a.status === "komt" ? `je komt${a.aantal > 1 ? ` met ${a.aantal}` : ""}` : "je komt niet"}. Je kunt dit hieronder wijzigen.` }) : null,
       d.bijeenkomst.aanmelden_tot ? el("p", { class: "hint", text: `Aanmelden kan tot ${datumLang(b.aanmelden_tot)}.` }) : null,
-      form);
+      form].filter(Boolean));
     return kaart;
   }
 
