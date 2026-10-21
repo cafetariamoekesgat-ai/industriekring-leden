@@ -60,7 +60,9 @@
     const a = el("a", { href: URL.createObjectURL(new Blob(["﻿" + tekst], { type })), download: naam });
     document.body.append(a); a.click(); a.remove();
   }
-  const csv = (rijen) => rijen.map((r) => r.map((c) => `"${String(c ?? "").replace(/"/g, '""')}"`).join(";")).join("\r\n");
+  // Cellen die met = + - @ beginnen zou Excel als formule uitvoeren; een apostrof ervoor maakt er tekst van.
+  const cel = (c) => { const s = String(c ?? ""); return /^[=+\-@\t\r]/.test(s) ? `'${s}` : s; };
+  const csv = (rijen) => rijen.map((r) => r.map((c) => `"${cel(c).replace(/"/g, '""')}"`).join(";")).join("\r\n");
 
   // ------------------------------------------------------------------ inloggen
   function inlogScherm(boodschap) {
@@ -77,8 +79,9 @@
         const adres = email.value.trim().toLowerCase();
         try { await window.ik.functie("inloggen", { method: "POST", body: { email: adres } }); } catch { /* inloglink hieronder geeft de melding */ }
         const { error } = await sb.auth.signInWithOtp({ email: adres, options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: false } });
+        // Zelfde melding of het adres nu wel of geen toegang heeft, zodat niemand kan uitproberen wie beheerder is.
         const geenAccount = error && /signups?|not allowed|not found/i.test(error.message);
-        uit.append(error ? melding("fout", geenAccount ? "Dit e-mailadres heeft geen toegang. Vraag een bestuurslid om je toe te voegen." : "Versturen lukte niet. Probeer het over een paar minuten opnieuw.") : melding("goed", "Kijk in je mail: je hebt een inloglink gekregen. Open die op dit apparaat."));
+        uit.append(error && !geenAccount ? melding("fout", "Versturen lukte niet. Probeer het over een paar minuten opnieuw.") : melding("goed", "Als dit adres toegang heeft, staat er nu een inloglink in je mail. Open die op dit apparaat. Geen mail binnen een paar minuten? Kijk in je spam of vraag een ander bestuurslid."));
       })();
     });
     inhoud.replaceChildren(kaart(el("h1", { text: "Beheer" }), el("p", { text: "Voor het bestuur van de Industriekring. Log in met je e-mailadres; je krijgt een link per mail." }), boodschap ? melding("let", boodschap) : null, form));
