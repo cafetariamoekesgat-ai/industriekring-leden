@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Aanmelden · Industriekring Ter Apel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/stijl.css">
+<link rel="icon" href="../assets/favicon.png">
+</head>
+<body>
+<header class="kop"><div class="binnen">
+  <img src="../assets/logo-wit.png" alt="Industriekring Ter Apel">
+  <span class="label">Aanmelden</span>
+</div></header>
+
+<main id="inhoud" aria-live="polite">
+  <div class="kaart"><p>Even laden…</p></div>
+</main>
+<p class="voet">Industriekring Ter Apel en omstreken · <a href="mailto:info@industriekringterapel.nl">info@industriekringterapel.nl</a></p>
+
+<script src="../assets/config.js"></script>
+<script src="../assets/gedeeld.js"></script>
+<script>
+(() => {
+  const { el, esc, datumLang, tijd, dag, maand, functie } = window.ik;
+  const main = document.getElementById("inhoud");
+  const token = new URLSearchParams(location.search).get("t") || "";
+
+  function melding(soort, tekst) { return el("div", { class: `melding ${soort}`, role: soort === "fout" ? "alert" : "status" }, tekst); }
+
+  function kopKaart(b, persoon) {
+    const kaart = el("div", { class: "kaart" });
+    if (b.afbeelding_url) kaart.append(el("img", { src: b.afbeelding_url, alt: "", style: "width:100%;height:auto;display:block;margin:-24px -24px 20px;width:calc(100% + 48px);max-width:none" }));
+    kaart.append(
+      el("div", { class: "datumrij" },
+        el("div", { class: "datumblok", "aria-hidden": "true" }, el("span", { class: "d", text: dag(b.start) }), el("span", { class: "m", text: maand(b.start) })),
+        el("span", { class: "label", text: persoon?.naam ? `Uitnodiging voor ${persoon.naam}` : "Uitnodiging" })),
+      el("h1", { text: b.titel }),
+      b.omschrijving ? el("p", { text: b.omschrijving }) : null,
+      el("div", { class: "info" },
+        el("strong", { text: `${datumLang(b.start)}, ${tijd(b.start)} uur` }),
+        b.programma ? el("div", { text: b.programma }) : null,
+        (b.locatie || b.adres) ? el("div", { text: [b.locatie, b.adres].filter(Boolean).join(", ") }) : null),
+    );
+    return kaart;
+  }
+
+  function formulier(d) {
+    const b = d.bijeenkomst, a = d.aanmelding;
+    const kaart = el("div", { class: "kaart" });
+    const status = el("div", { id: "status" });
+    const form = el("form", { novalidate: true });
+
+    const keuze = el("fieldset", { style: "border:0;padding:0;margin:0" },
+      el("legend", { class: "groeplabel", text: "Kom je?" }),
+      el("div", { class: "keuze" },
+        el("input", { type: "radio", name: "status", id: "komt", value: "komt", checked: !a || a.status === "komt" }),
+        el("label", { for: "komt", text: "Ja, ik kom" }),
+        el("input", { type: "radio", name: "status", id: "komt_niet", value: "komt_niet", checked: a?.status === "komt_niet" }),
+        el("label", { for: "komt_niet", text: "Nee, ik kan niet" })));
+
+    const aantal = el("select", { id: "aantal", name: "aantal" });
+    for (let i = 1; i <= b.max_personen; i++) aantal.append(el("option", { value: i, text: i === 1 ? "Alleen ik" : `${i} personen`, selected: (a?.aantal ?? 1) === i }));
+    const details = el("div", { id: "details", style: "display:grid;gap:16px" },
+      b.max_personen > 1 ? el("div", { class: "veld" }, el("label", { for: "aantal", text: "Met hoeveel personen?" }), aantal) : null,
+      b.vraag_eten ? el("fieldset", { style: "border:0;padding:0;margin:0" },
+        el("legend", { class: "groeplabel", text: "Eet je mee?" }),
+        el("div", { class: "keuze" },
+          el("input", { type: "radio", name: "eten", id: "eten_ja", value: "ja", checked: a ? a.eet_mee !== false : true }),
+          el("label", { for: "eten_ja", text: "Ja, graag" }),
+          el("input", { type: "radio", name: "eten", id: "eten_nee", value: "nee", checked: a?.eet_mee === false }),
+          el("label", { for: "eten_nee", text: "Nee, dank je" }))) : null,
+      el("div", { class: "veld" }, el("label", { for: "dieet", text: "Dieetwensen of allergieën (optioneel)" }),
+        el("input", { type: "text", id: "dieet", maxlength: "300", value: a?.dieetwensen ?? "", autocomplete: "off" })));
+    const opmerking = el("div", { class: "veld" }, el("label", { for: "opm", text: "Opmerking (optioneel)" }),
+      el("input", { type: "text", id: "opm", maxlength: "500", value: a?.opmerking ?? "", autocomplete: "off" }));
+    const knop = el("button", { type: "submit", class: "knop", text: a ? "Wijziging opslaan" : "Versturen" });
+
+    function bijwerken() {
+      const komt = form.querySelector("input[name=status]:checked")?.value === "komt";
+      details.classList.toggle("verborgen", !komt);
+    }
+    form.addEventListener("change", bijwerken);
+    form.append(keuze, details, opmerking, knop, status);
+    bijwerken();
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      status.replaceChildren();
+      const komt = form.querySelector("input[name=status]:checked")?.value;
+      knop.disabled = true; knop.textContent = "Bezig…";
+      try {
+        const res = await functie("aanmelden", { method: "POST", body: {
+          t: token, status: komt, aantal: Number(aantal.value || 1),
+          eet_mee: b.vraag_eten ? form.querySelector("input[name=eten]:checked")?.value === "ja" : null,
+          dieetwensen: document.getElementById("dieet").value, opmerking: document.getElementById("opm").value,
+        } });
+        const tekst = res.status === "komt"
+          ? `Je bent aangemeld${res.aantal > 1 ? ` met ${res.aantal} personen` : ""}. ${res.bevestiging === "verzonden" ? "Je krijgt een bevestiging per mail." : ""}`
+          : "Je afmelding is ontvangen. Bedankt dat je het laat weten.";
+        status.append(melding("goed", tekst));
+        if (res.status === "komt") status.append(el("p", {}, el("a", { href: `${window.IKTA.functies}/aanmelden?t=${encodeURIComponent(token)}&ics=1`, class: "knop tweede klein", text: "Zet in je agenda" })));
+        knop.textContent = "Wijziging opslaan";
+      } catch (err) {
+        status.append(melding("fout", err.message));
+        knop.textContent = a ? "Wijziging opslaan" : "Versturen";
+      } finally { knop.disabled = false; }
+    });
+
+    kaart.append(
+      el("h2", { text: a ? "Je reactie aanpassen" : "Laat weten of je komt" }),
+      a ? el("p", { class: "hint", text: `Je huidige reactie: ${a.status === "komt" ? `je komt${a.aantal > 1 ? ` met ${a.aantal}` : ""}` : "je komt niet"}. Je kunt dit hieronder wijzigen.` }) : null,
+      d.bijeenkomst.aanmelden_tot ? el("p", { class: "hint", text: `Aanmelden kan tot ${datumLang(b.aanmelden_tot)}.` }) : null,
+      form);
+    return kaart;
+  }
+
+  async function start() {
+    if (!/^[A-Za-z0-9_-]{20,40}$/.test(token)) {
+      main.replaceChildren(el("div", { class: "kaart" }, el("h1", { text: "Deze link werkt niet" }), el("p", { text: "Gebruik de knop in je uitnodiging, of vraag het bestuur om een nieuwe link." })));
+      return;
+    }
+    try {
+      const d = await functie("aanmelden", { query: `?t=${encodeURIComponent(token)}` });
+      const b = d.bijeenkomst;
+      document.title = `${b.titel} · Industriekring Ter Apel`;
+      const delen = [];
+      if (d.testmodus) delen.push(melding("let", "Testmodus: er gaan nog geen echte mails uit."));
+      delen.push(kopKaart(b, d.persoon));
+      if (d.gesloten) delen.push(el("div", { class: "kaart" }, melding("let", "Deze bijeenkomst is al geweest.")));
+      else if (b.aanmeldwijze === "extern" && b.externe_link) {
+        delen.push(el("div", { class: "kaart" }, el("h2", { text: "Kaarten" }), b.externe_tekst ? el("p", { text: b.externe_tekst }) : null,
+          el("a", { href: b.externe_link, class: "knop", rel: "noopener", text: "Kaarten bestellen" })));
+      } else if (b.aanmeldwijze === "geen") delen.push(el("div", { class: "kaart" }, el("p", { text: "Aanmelden is voor deze bijeenkomst niet nodig. Tot dan!" })));
+      else if (d.deadline_voorbij && d.aanmelding?.status !== "komt") delen.push(el("div", { class: "kaart" }, melding("let", "Aanmelden is gesloten. Wil je toch komen? Neem contact op met het bestuur.")));
+      else delen.push(formulier(d));
+      main.replaceChildren(...delen);
+    } catch (err) {
+      main.replaceChildren(el("div", { class: "kaart" }, el("h1", { text: "Dat lukte niet" }), melding("fout", err.message)));
+    }
+  }
+  start();
+})();
+</script>
+</body>
+</html>

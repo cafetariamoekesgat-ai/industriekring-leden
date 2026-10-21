@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jaarplanning in je agenda · Industriekring Ter Apel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/stijl.css">
+<link rel="icon" href="../assets/favicon.png">
+</head>
+<body>
+<header class="kop"><div class="binnen">
+  <img src="../assets/logo-wit.png" alt="Industriekring Ter Apel">
+  <span class="label">Jaarplanning</span>
+</div></header>
+<main>
+  <div class="kaart">
+    <h1>De jaarplanning in je eigen agenda</h1>
+    <p>Abonneer je één keer op de agenda van de Industriekring. Nieuwe bijeenkomsten en wijzigingen verschijnen dan vanzelf in je agenda, op telefoon en computer.</p>
+    <p><a class="knop" id="webcal" href="#">Toevoegen aan mijn agenda</a></p>
+    <p class="hint">Werkt direct op iPhone, Mac en in Outlook. Gebruik je Google Agenda, kies dan de knop hieronder.</p>
+    <p><a class="knop tweede" id="google" href="#" rel="noopener">Toevoegen aan Google Agenda</a></p>
+    <h2 style="margin-top:28px">Lukt het niet?</h2>
+    <p>Kopieer dit adres en kies in je agenda voor <em>Agenda toevoegen › Abonneren via internet</em> (Outlook) of <em>Andere agenda's › Via URL</em> (Google):</p>
+    <div class="info" style="word-break:break-all;font-family:ui-monospace,Menlo,monospace;font-size:15px" id="adres"></div>
+    <button class="knop tweede klein" id="kopieer" type="button">Adres kopiëren</button>
+    <span id="gekopieerd" class="hint" aria-live="polite"></span>
+  </div>
+</main>
+<p class="voet">Industriekring Ter Apel en omstreken · <a href="mailto:info@industriekringterapel.nl">info@industriekringterapel.nl</a></p>
+<script src="../assets/config.js"></script>
+<script>
+(() => {
+  const https = `${window.IKTA.functies}/agenda`;
+  const webcal = https.replace(/^https:/, "webcal:");
+  document.getElementById("webcal").href = webcal;
+  document.getElementById("google").href = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcal)}`;
+  document.getElementById("adres").textContent = https;
+  document.getElementById("kopieer").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(https); document.getElementById("gekopieerd").textContent = " Gekopieerd."; }
+    catch { document.getElementById("gekopieerd").textContent = " Selecteer het adres en kopieer het met de hand."; }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lid worden · Industriekring Ter Apel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/stijl.css">
+<link rel="icon" href="../assets/favicon.png">
+<style>
+  body.ingebed { background: transparent; }
+  body.ingebed .kop, body.ingebed .voet { display: none; }
+  body.ingebed main { padding: 0; }
+  .lokker { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+</style>
+</head>
+<body>
+<header class="kop"><div class="binnen">
+  <img src="../assets/logo-wit.png" alt="Industriekring Ter Apel">
+  <span class="label">Lid worden</span>
+</div></header>
+<main>
+  <div class="kaart">
+    <h1>Lid worden van de Industriekring</h1>
+    <p>Ondernemer in Ter Apel of omgeving? Meld je bedrijf aan. Het bestuur neemt daarna contact met je op over het lidmaatschap.</p>
+    <form id="form" novalidate>
+      <div class="veld"><label for="bedrijfsnaam">Bedrijfsnaam *</label><input id="bedrijfsnaam" name="bedrijfsnaam" type="text" required maxlength="150" autocomplete="organization"></div>
+      <div class="twee">
+        <div class="veld"><label for="contactpersoon">Contactpersoon *</label><input id="contactpersoon" name="contactpersoon" type="text" required maxlength="120" autocomplete="name"></div>
+        <div class="veld"><label for="functie">Functie</label><input id="functie" name="functie" type="text" maxlength="80" autocomplete="organization-title"></div>
+      </div>
+      <div class="twee">
+        <div class="veld"><label for="email">E-mailadres *</label><input id="email" name="email" type="email" required maxlength="200" autocomplete="email"></div>
+        <div class="veld"><label for="telefoon">Mobiel nummer</label><input id="telefoon" name="telefoon" type="tel" maxlength="30" autocomplete="tel"><span class="hint">Voor de WhatsApp-berichten van de kring.</span></div>
+      </div>
+      <div class="veld"><label for="adres">Adres</label><input id="adres" name="adres" type="text" maxlength="150" autocomplete="street-address"></div>
+      <div class="twee">
+        <div class="veld"><label for="postcode">Postcode</label><input id="postcode" name="postcode" type="text" maxlength="10" autocomplete="postal-code"></div>
+        <div class="veld"><label for="plaats">Plaats</label><input id="plaats" name="plaats" type="text" maxlength="80" autocomplete="address-level2" value="Ter Apel"></div>
+      </div>
+      <div class="twee">
+        <div class="veld"><label for="kvk">KvK-nummer</label><input id="kvk" name="kvk" type="text" inputmode="numeric" maxlength="12"></div>
+        <div class="veld"><label for="branche">Branche</label><input id="branche" name="branche" type="text" maxlength="80"></div>
+      </div>
+      <div class="veld"><label for="website">Website</label><input id="website" name="website" type="url" maxlength="200" placeholder="https://" autocomplete="url"></div>
+      <div class="veld"><label for="hoe_bekend">Hoe ken je de Industriekring?</label><input id="hoe_bekend" name="hoe_bekend" type="text" maxlength="200"></div>
+      <div class="veld"><label for="opmerking">Opmerking</label><textarea id="opmerking" name="opmerking" maxlength="1000"></textarea></div>
+      <div class="lokker" aria-hidden="true"><label for="fax">Laat dit veld leeg</label><input id="fax" name="fax" type="text" tabindex="-1" autocomplete="off"></div>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:16px"><input type="checkbox" id="toestemming" style="width:20px;height:20px;margin-top:3px"> <span>Ons bedrijf mag met naam en logo in het ledenoverzicht op de website staan.</span></label>
+      <p class="hint">We gebruiken je gegevens alleen voor het lidmaatschap en de uitnodigingen van de kring.</p>
+      <button class="knop" type="submit">Aanmelding versturen</button>
+      <div id="status" aria-live="polite"></div>
+    </form>
+  </div>
+</main>
+<p class="voet">Industriekring Ter Apel en omstreken · <a href="mailto:info@industriekringterapel.nl">info@industriekringterapel.nl</a></p>
+<script src="../assets/config.js"></script>
+<script src="../assets/gedeeld.js"></script>
+<script>
+(() => {
+  const ingebed = new URLSearchParams(location.search).has("embed");
+  if (ingebed) document.body.classList.add("ingebed");
+  const t0 = Date.now();
+  const form = document.getElementById("form");
+  const status = document.getElementById("status");
+  const knop = form.querySelector("button");
+  function hoogte() { if (ingebed && parent !== window) parent.postMessage({ industriekring: "hoogte", hoogte: document.documentElement.scrollHeight }, "*"); }
+  new ResizeObserver(hoogte).observe(document.body);
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    status.replaceChildren();
+    const v = (id) => document.getElementById(id).value.trim();
+    if (!v("bedrijfsnaam") || !v("contactpersoon") || !v("email")) {
+      status.append(window.ik.el("div", { class: "melding fout", role: "alert", text: "Vul in elk geval de bedrijfsnaam, contactpersoon en het e-mailadres in." }));
+      return;
+    }
+    knop.disabled = true; knop.textContent = "Bezig…";
+    try {
+      await window.ik.functie("lid-worden", { method: "POST", body: {
+        bedrijfsnaam: v("bedrijfsnaam"), contactpersoon: v("contactpersoon"), functie: v("functie"), email: v("email"), telefoon: v("telefoon"),
+        adres: v("adres"), postcode: v("postcode"), plaats: v("plaats"), kvk: v("kvk"), branche: v("branche"), website: v("website"),
+        hoe_bekend: v("hoe_bekend"), opmerking: v("opmerking"), fax: v("fax"), t0,
+        toestemming_ledenoverzicht: document.getElementById("toestemming").checked,
+      } });
+      form.replaceChildren(window.ik.el("div", { class: "melding goed", role: "status", text: "Dank je wel! We hebben je aanmelding ontvangen. Het bestuur neemt binnenkort contact met je op." }));
+    } catch (err) {
+      status.append(window.ik.el("div", { class: "melding fout", role: "alert", text: err.message }));
+      knop.disabled = false; knop.textContent = "Aanmelding versturen";
+    }
+    hoogte();
+  });
+})();
+</script>
+</body>
+</html>

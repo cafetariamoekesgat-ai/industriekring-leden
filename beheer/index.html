@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Beheer · Industriekring Ter Apel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/stijl.css">
+<link rel="icon" href="../assets/favicon.png">
+<style>
+  main { max-width: 1100px; }
+  .kop .binnen { max-width: 1100px; }
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; margin: 0 0 16px; border-bottom: 1px solid var(--lijn); }
+  .tabs a { font-family: var(--kop); font-weight: 600; text-decoration: none; color: var(--inkt-zacht); padding: 10px 14px; border-bottom: 3px solid transparent; min-height: 44px; display: inline-flex; align-items: center; }
+  .tabs a[aria-current="page"] { color: var(--merk); border-bottom-color: var(--accent); }
+  .balk { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
+  .tabel { width: 100%; border-collapse: collapse; font-size: 15px; background: var(--grond); }
+  .tabel th, .tabel td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--lijn); vertical-align: top; }
+  .tabel th { font-family: var(--kop); font-weight: 600; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gedempt); background: var(--lucht); position: sticky; top: 0; }
+  .tabel tr.klik { cursor: pointer; }
+  .tabel tr.klik:hover td { background: var(--lucht); }
+  .scroll { overflow-x: auto; border: 1px solid var(--lijn); }
+  .pil { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--lucht); color: var(--inkt-zacht); white-space: nowrap; }
+  .pil.goed { background: #E8F4EE; color: #134D31; } .pil.fout { background: #FBEAEA; color: #7A1A14; } .pil.let { background: #FFF3E5; color: #6B3A00; } .pil.merk { background: var(--merk); color: #fff; }
+  .cijfers { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 10px; margin: 12px 0; }
+  .cijfer { background: var(--lucht); padding: 12px; } .cijfer b { display: block; font-family: var(--kop); font-size: 26px; color: var(--merk); }
+  .rooster { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+  .rooster .breed { grid-column: 1 / -1; }
+  @media (max-width: 700px) { .rooster { grid-template-columns: 1fr; } }
+  form > button.knop { justify-self: start; }
+  .balk input[type=search] { flex: 1 1 260px; width: auto; }
+  .balk select { width: auto; flex: 0 0 auto; }
+  .tabel th[scope=row] { position: static; width: 180px; }
+  dialog { border: 1px solid var(--lijn); padding: 0; max-width: 560px; width: calc(100% - 32px); }
+  dialog::backdrop { background: rgba(11, 46, 102, .35); }
+  dialog .kaart { border: 0; }
+  @media print {
+    .kop, .tabs, .balk, .geen-print, #statusbalk { display: none !important; }
+    body { background: #fff; } main { padding: 0; } .kaart { border: 0; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<header class="kop"><div class="binnen">
+  <img src="../assets/logo-wit.png" alt="Industriekring Ter Apel">
+  <span class="label" id="wie">Beheer</span>
+</div></header>
+<main>
+  <div id="statusbalk"></div>
+  <nav class="tabs verborgen" id="tabs" aria-label="Onderdelen">
+    <a href="#bijeenkomsten">Bijeenkomsten</a>
+    <a href="#leden">Leden</a>
+    <a href="#aanvragen">Aanmeldingen lid</a>
+    <a href="#instellingen">Instellingen</a>
+  </nav>
+  <div id="inhoud" aria-live="polite"><div class="kaart"><p>Even laden…</p></div></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="../assets/config.js"></script>
+<script src="../assets/gedeeld.js"></script>
+<script src="beheer.js"></script>
+</body>
+</html>

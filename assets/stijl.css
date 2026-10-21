@@ -1,0 +1,73 @@
+/* Industriekring Ter Apel — huisstijl voor de ledenpagina's */
+:root {
+  --merk: #11418E; --merk-donker: #0B2E66; --merk-licht: #2A5DB0;
+  --accent: #E87500; --accent-tekst: #B55A00; --accent-op-merk: #F5A24A;
+  --grond: #FFFFFF; --lucht: #EEF2FA; --lijn: #D6DEEE;
+  --inkt: #1A1F24; --inkt-zacht: #3B4650; --gedempt: #5C6670;
+  --goed: #1F7A4D; --fout: #B3261E;
+  --kop: "Jost", "Segoe UI", system-ui, sans-serif;
+  --tekst: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--lucht); color: var(--inkt); font-family: var(--tekst); font-size: 17px; line-height: 1.5; }
+a { color: var(--accent-tekst); }
+a:hover { color: var(--merk); }
+h1, h2, h3 { font-family: var(--kop); color: var(--merk); line-height: 1.15; margin: 0 0 .4em; }
+h1 { font-size: clamp(26px, 6vw, 34px); font-weight: 700; }
+h2 { font-size: 22px; font-weight: 700; }
+h3 { font-size: 18px; font-weight: 600; }
+.label { font-family: var(--kop); font-weight: 600; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--gedempt); }
+
+.kop { background: var(--merk-donker); color: #fff; }
+.kop .binnen { max-width: 760px; margin: 0 auto; padding: 18px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.kop img { height: 50px; width: auto; display: block; }
+.kop .label { color: var(--accent-op-merk); }
+
+main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+.kaart { background: var(--grond); border: 1px solid var(--lijn); padding: 24px; }
+.kaart + .kaart { margin-top: 16px; }
+@media (max-width: 520px) { .kaart { padding: 18px; } }
+
+.datumrij { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.datumblok { background: var(--accent); color: #fff; font-family: var(--kop); text-align: center; padding: 10px 14px; line-height: 1; min-width: 64px; }
+.datumblok .d { font-size: 28px; font-weight: 700; display: block; }
+.datumblok .m { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; display: block; margin-top: 4px; }
+
+.info { background: var(--lucht); padding: 14px 16px; margin: 16px 0; }
+.info strong { display: block; }
+
+form { display: grid; gap: 16px; }
+.veld { display: grid; gap: 6px; align-content: start; }
+.veld label, .groeplabel { font-weight: 600; font-size: 15px; }
+.hint { font-size: 14px; color: var(--gedempt); }
+input[type=text], input[type=email], input[type=tel], input[type=number], input[type=url], input[type=date], input[type=datetime-local], input[type=search], select, textarea {
+  font: inherit; font-size: 16px; color: var(--inkt); background: var(--grond); border: 1px solid var(--lijn); border-radius: 4px;
+  min-height: 48px; padding: 10px 12px; width: 100%;
+}
+textarea { min-height: 96px; resize: vertical; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--accent-op-merk); outline-offset: 2px; }
+.twee { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .twee { grid-template-columns: 1fr; } }
+
+.keuze { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.keuze input { position: absolute; opacity: 0; pointer-events: none; }
+.keuze label { display: flex; align-items: center; justify-content: center; min-height: 56px; border: 2px solid var(--lijn); background: var(--grond); border-radius: 4px; font-weight: 600; cursor: pointer; text-align: center; padding: 8px; }
+.keuze input:checked + label { border-color: var(--merk); background: var(--lucht); color: var(--merk); }
+.keuze input:focus-visible + label { outline: 3px solid var(--accent-op-merk); outline-offset: 2px; }
+
+.knop { font: inherit; font-weight: 600; font-size: 17px; min-height: 52px; padding: 12px 22px; border: 0; border-radius: 4px; background: var(--accent-tekst); color: #fff; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.knop:hover { background: #9A4C00; color: #fff; }
+.knop[disabled] { opacity: .6; cursor: wait; }
+.knop.tweede { background: var(--grond); color: var(--merk); border: 1px solid var(--merk); }
+.knop.tweede:hover { background: var(--lucht); color: var(--merk); }
+.knop.klein { min-height: 40px; padding: 8px 14px; font-size: 15px; }
+
+.melding { padding: 14px 16px; border-left: 0; background: var(--lucht); border: 1px solid var(--lijn); }
+.melding.goed { background: #E8F4EE; border-color: #B8DCC8; color: #134D31; }
+.melding.fout { background: #FBEAEA; border-color: #F0C2BF; color: #7A1A14; }
+.melding.let { background: #FFF3E5; border-color: #F6D2A8; color: #6B3A00; }
+.verborgen { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.voet { max-width: 760px; margin: 0 auto; padding: 0 16px 32px; font-size: 14px; color: var(--gedempt); }
